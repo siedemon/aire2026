@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://agentgateway.dev/schema/config
+binds:
+  - port: 3000
+    listeners:
+      - routes:
+          - policies:
+              cors:
+                allowOrigins: ["*"]
+                allowHeaders: ["*"]
+              localRateLimit:
+                - maxTokens: 10
+                  tokensPerFill: 10
+                  fillInterval: 60s
+            backends:
+              - ai:
+                  name: gemini
+                  provider:
+                    gemini:
+                      model: gemini-2.5-flash-lite
+                  policies:
+                    backendAuth:
+                      key: "$GEMINI_API_KEY"
