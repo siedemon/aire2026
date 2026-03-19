@@ -148,8 +148,9 @@ curl -s http://localhost:8080/v1/chat/completions \
   }' | python3 -m json.tool
 ```
 
-# файли-репозиторію
+## Файли репозиторію
 
+```
 README.md                  # цей файл
 lab1/
 ├── agentgateway-config.yaml   # standalone конфіг для початківців
