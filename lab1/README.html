@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Lab-1 // agentgateway</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;0,700;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:     #040804;
+  --bg1:    #080f08;
+  --bg2:    #0b120b;
+  --bg3:    #0f180f;
+  --g0:     #00ff41;
+  --g1:     #39d353;
+  --g2:     #2ea043;
+  --g3:     #196127;
+  --g4:     #0d3b1a;
+  --g5:     #071a0d;
+  --dim:    #4a7a4a;
+  --dimmer: #2a4a2a;
+  --text:   #b8d4b8;
+  --text2:  #7a9e7a;
+  --text3:  #3d5e3d;
+  --amber:  #ffb700;
+  --red:    #ff4444;
+  --cyan:   #00d4aa;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.7;
+  min-height: 100vh;
+}
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(0,255,65,0.012) 1px, rgba(0,255,65,0.012) 2px);
+  pointer-events: none;
+  z-index: 999;
+}
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 24px 80px; }
+.topbar {
+  border-bottom: 1px solid var(--g4);
+  padding: 10px 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text3);
+}
+.topbar-dots { display: flex; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; }
+.dot-r { background: #3a1212; border: 1px solid #662020; }
+.dot-y { background: #3a2e12; border: 1px solid #665020; }
+.dot-g { background: #123a12; border: 1px solid #206620; }
+.topbar-path { color: var(--g3); }
+.topbar-path span { color: var(--g1); }
+.boot { padding: 32px 0 24px; border-bottom: 1px solid var(--g5); margin-bottom: 32px; }
+.boot-line { font-size: 11px; color: var(--text3); line-height: 2; }
+.boot-line .ok   { color: var(--g1); }
+.boot-line .warn { color: var(--amber); }
+.boot-line .cyan { color: var(--cyan); }
+.boot-line .dim  { color: var(--dimmer); }
+.title-block { margin: 28px 0 8px; }
+.title-pre { font-size: 11px; color: var(--g3); letter-spacing: 0.1em; margin-bottom: 6px; }
+.ascii-title { font-size: 12px; line-height: 1.3; color: var(--g1); white-space: pre; display: block; }
+.subtitle-line { font-size: 12px; color: var(--text3); margin-top: 8px; }
+.subtitle-line .hl { color: var(--g2); }
+.cursor-blink { display: inline-block; width: 8px; height: 14px; background: var(--g0); vertical-align: middle; margin-left: 2px; animation: blink .9s step-end infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.prompt { display: flex; align-items: flex-start; gap: 8px; margin: 20px 0 4px; }
+.prompt-ps1 { color: var(--g1); white-space: nowrap; flex-shrink: 0; }
+.prompt-ps1 .host { color: var(--cyan); }
+.prompt-ps1 .sep  { color: var(--dimmer); }
+.prompt-ps1 .path { color: var(--g2); }
+.prompt-cmd { color: var(--text); }
+.section { margin: 36px 0 0; }
+.section-header {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px; padding-bottom: 8px;
+  border-bottom: 1px solid var(--g5);
+}
+.section-num { font-size: 10px; color: var(--g3); letter-spacing: 0.1em; }
+.section-title { font-size: 14px; font-weight: 700; color: var(--g0); letter-spacing: 0.05em; }
+.section-tag { font-size: 10px; color: var(--g3); border: 1px solid var(--g4); padding: 1px 7px; letter-spacing: 0.08em; }
+.step { margin: 20px 0; }
+.step-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.step-n { font-size: 11px; color: var(--g3); min-width: 60px; }
+.step-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.code-wrap { background: var(--bg1); border: 1px solid var(--g5); border-left: 2px solid var(--g3); margin: 8px 0 16px; overflow-x: auto; }
+.code-header { display: flex; align-items: center; justify-content: space-between; padding: 5px 12px; border-bottom: 1px solid var(--g5); background: var(--bg2); }
+.code-lang { font-size: 10px; color: var(--g3); letter-spacing: 0.1em; text-transform: uppercase; }
+.code-file { font-size: 10px; color: var(--dimmer); }
+pre { padding: 14px 16px; margin: 0; overflow-x: auto; }
+code { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); line-height: 1.75; }
+.code-wrap pre code { background: none; border: none; padding: 0; }
+.kw  { color: var(--g1); }
+.str { color: var(--cyan); }
+.cmt { color: var(--text3); font-style: italic; }
+.num { color: var(--amber); }
+.key { color: var(--text2); }
+code:not(pre code) { background: var(--bg2); border: 1px solid var(--g5); color: var(--g1); padding: 1px 5px; font-size: 11.5px; }
+.output { background: var(--bg); border: 1px solid var(--g5); border-left: 2px solid var(--g4); padding: 12px 16px; margin: 4px 0 16px; font-size: 12px; color: var(--text2); }
+.output .ok   { color: var(--g1); }
+.output .info { color: var(--cyan); }
+.output .ts   { color: var(--text3); }
+.output .url  { color: var(--g2); text-decoration: underline; }
+.arch { background: var(--bg1); border: 1px solid var(--g5); padding: 20px 24px; margin: 16px 0; overflow-x: auto; }
+.arch pre { padding: 0; background: none; border: none; }
+.arch pre code { font-size: 12px; color: var(--g2); line-height: 1.6; }
+.tbl-wrap { overflow-x: auto; margin: 12px 0 20px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+thead tr { border-bottom: 1px solid var(--g4); }
+th { text-align: left; padding: 8px 14px; color: var(--g2); font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 500; background: var(--bg2); }
+td { padding: 7px 14px; border-bottom: 1px solid var(--g5); color: var(--text); vertical-align: top; }
+tr:hover td { background: var(--bg2); }
+td code { font-size: 11px; }
+.shot { border: 1px solid var(--g5); border-left: 2px solid var(--g4); margin: 12px 0 20px; background: var(--bg1); }
+.shot-bar { display: flex; align-items: center; gap: 8px; padding: 6px 12px; background: var(--bg2); border-bottom: 1px solid var(--g5); font-size: 10px; color: var(--text3); }
+.shot-bar .shot-icon { color: var(--g3); }
+.shot img { display: block; width: 100%; }
+.shot-cap { padding: 6px 12px; font-size: 11px; color: var(--text3); border-top: 1px solid var(--g5); }
+.toc { background: var(--bg1); border: 1px solid var(--g5); border-left: 2px solid var(--g3); padding: 16px 20px; margin: 24px 0 32px; }
+.toc-title { font-size: 10px; color: var(--g3); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 10px; }
+.toc ul { list-style: none; padding: 0; }
+.toc li { padding: 2px 0; }
+.toc a { color: var(--text3); text-decoration: none; font-size: 12px; display: flex; align-items: center; gap: 8px; transition: color 0.1s; }
+.toc a::before { content: '├─'; color: var(--g5); font-size: 11px; }
+.toc li:last-child > a::before { content: '└─'; }
+.toc a:hover { color: var(--g1); }
+.tree { background: var(--bg1); border: 1px solid var(--g5); padding: 16px 20px; margin: 12px 0; }
+.tree pre { background: none; border: none; padding: 0; }
+.tree pre code { font-size: 12px; color: var(--text3); }
+.t-dir  { color: var(--g2); font-weight: 500; }
+.t-file { color: var(--text2); }
+.t-cmt  { color: var(--text3); }
+.t-sym  { color: var(--g5); }
+.links { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 8px; margin: 12px 0; }
+.lnk { background: var(--bg1); border: 1px solid var(--g5); padding: 10px 14px; transition: border-color 0.15s; }
+.lnk:hover { border-color: var(--g3); }
+.lnk a { color: var(--text3); text-decoration: none; font-size: 12px; display: flex; align-items: center; gap: 6px; }
+.lnk a:hover { color: var(--g1); }
+.lnk-arr { color: var(--g4); font-size: 11px; }
+.div-line { display: flex; align-items: center; gap: 12px; margin: 32px 0 0; color: var(--g5); font-size: 11px; }
+.div-line::before, .div-line::after { content: ''; flex: 1; height: 1px; background: var(--g5); }
+.pbadge { display: inline-block; font-size: 10px; color: var(--g2); background: var(--g5); border: 1px solid var(--g4); padding: 1px 7px; letter-spacing: 0.06em; }
+.pbadge.route   { color: var(--cyan);  border-color: #0a3030; background: #041818; }
+.pbadge.backend { color: var(--amber); border-color: #3a2500; background: #1a1000; }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--g4); }
+a { color: var(--g2); text-decoration: none; }
+a:hover { color: var(--g0); }
+strong { color: var(--text); font-weight: 700; }
+p { color: var(--text2); margin: 8px 0; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="topbar">
+  <div class="topbar-dots">
+    <div class="dot dot-r"></div><div class="dot dot-y"></div><div class="dot dot-g"></div>
+  </div>
+  <span class="topbar-path">~/llmops/<span>lab-1</span>/README.html</span>
+  <span style="margin-left:auto;color:var(--g3)">agentgateway · gemini-2.5-flash-lite · 2026</span>
+</div>
+
+<div class="boot">
+  <div class="boot-line"><span class="dim">[    0.000000]</span> Linux version 6.x.x (gcc 13.2)</div>
+  <div class="boot-line"><span class="dim">[    0.012345]</span> <span class="ok">[ OK ]</span> agentgateway binary detected</div>
+  <div class="boot-line"><span class="dim">[    0.023456]</span> <span class="ok">[ OK ]</span> GEMINI_API_KEY loaded from environment</div>
+  <div class="boot-line"><span class="dim">[    0.034567]</span> <span class="ok">[ OK ]</span> config.yaml parsed — 0 errors</div>
+  <div class="boot-line"><span class="dim">[    0.045678]</span> <span class="cyan">[ -- ]</span> UI listening on <span class="cyan">http://localhost:15000/ui</span></div>
+  <div class="boot-line"><span class="dim">[    0.056789]</span> <span class="cyan">[ -- ]</span> proxy listening on <span class="cyan">http://localhost:3000</span></div>
+</div>
+
+<div class="title-block">
+  <div class="title-pre">// lab-1 :: basic agentic infrastructure</div>
+  <code class="ascii-title"> █████╗  ██████╗ ███████╗███╗   ██╗████████╗ ██████╗  █████╗ ████████╗███████╗██╗    ██╗ █████╗ ██╗   ██╗
+██╔══██╗██╔════╝ ██╔════╝████╗  ██║╚══██╔══╝██╔════╝ ██╔══██╗╚══██╔══╝██╔════╝██║    ██║██╔══██╗╚██╗ ██╔╝
+███████║██║  ███╗█████╗  ██╔██╗ ██║   ██║   ██║  ███╗███████║   ██║   █████╗  ██║ █╗ ██║███████║ ╚████╔╝
+██╔══██║██║   ██║██╔══╝  ██║╚██╗██║   ██║   ██║   ██║██╔══██║   ██║   ██╔══╝  ██║███╗██║██╔══██║  ╚██╔╝
+██║  ██║╚██████╔╝███████╗██║ ╚████║   ██║   ╚██████╔╝██║  ██║   ██║   ███████╗╚███╔███╔╝██║  ██║   ██║
+╚═╝  ╚═╝ ╚═════╝ ╚══════╝╚═╝  ╚═══╝   ╚═╝    ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚══════╝ ╚══╝╚══╝ ╚═╝  ╚═╝   ╚═╝</code>
+  <div class="subtitle-line"><span class="hl">LLM/MCP/A2A gateway</span> · written in Rust · LLMOps Lab-1<span class="cursor-blink"></span></div>
+</div>
+
+<div class="toc">
+  <div class="toc-title">// index</div>
+  <ul>
+    <li><a href="#overview">огляд архітектури</a></li>
+    <li><a href="#prereqs">передумови</a></li>
+    <li><a href="#install">встановлення binary</a></li>
+    <li><a href="#config">налаштування config.yaml</a></li>
+    <li><a href="#run">запуск та UI</a></li>
+    <li><a href="#test">перевірка LLM</a></li>
+    <li><a href="#policy">policy довідка</a></li>
+    <li><a href="#files">файли репозиторію</a></li>
+    <li><a href="#links">посилання</a></li>
+  </ul>
+</div>
+
+<div class="section" id="overview">
+  <div class="section-header">
+    <span class="section-num">// 00</span>
+    <span class="section-title">OVERVIEW</span>
+  </div>
+  <p>Розгортання <a href="https://agentgateway.dev">agentgateway</a> — opensource LLM/MCP/A2A проксі між клієнтом і Gemini API.</p>
+  <div class="arch">
+    <pre><code>
+  CLIENT / curl / kagent
+         │
+         ▼
+┌────────────────────────────────────────────────┐
+│          agentgateway   :3000                  │
+│                                                │
+│  route:   cors · localRateLimit · jwtAuth      │
+│  backend: backendAuth · timeout · retry        │
+└──────────────────────┬─────────────────────────┘
+                       │  HTTPS
+                       ▼
+       ┌───────────────────────────────┐
+       │  Google Gemini API            │
+       │  gemini-2.5-flash-lite        │
+       └───────────────────────────────┘
+
+  admin UI:  http://localhost:15000/ui
+  proxy:     http://localhost:3000
+    </code></pre>
+  </div>
+</div>
+
+<div class="section" id="prereqs">
+  <div class="section-header">
+    <span class="section-num">// 01</span>
+    <span class="section-title">PREREQS</span>
+  </div>
+  <div class="output">
+    <span class="ok">REQUIRED</span><br/>
+    ├─ curl, bash<br/>
+    ├─ python3 (для json.tool)<br/>
+    └─ Google Gemini API Key → <a class="url" href="https://aistudio.google.com/api-keys">aistudio.google.com/api-keys</a>
+  </div>
+</div>
+
+<div class="section" id="install">
+  <div class="section-header">
+    <span class="section-num">// 02</span>
+    <span class="section-title">INSTALL BINARY</span>
+    <span class="section-tag">STEP 1</span>
+  </div>
+  <div class="prompt">
+    <span class="prompt-ps1"><span class="host">user</span><span class="sep">@</span><span class="host">lab</span><span class="sep">:</span><span class="path">~</span><span class="sep">$</span>&nbsp;</span>
+    <span class="prompt-cmd">curl -sL agentgateway.dev/install | bash</span>
+  </div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">bash</span><span class="code-file">install + verify</span></div>
+    <pre><code><span class="cmt"># встановлення бінарника</span>
+curl -sL https://agentgateway.dev/install | bash
+
+<span class="cmt"># перевірка версії</span>
+agentgateway --version</code></pre>
+  </div>
+  <div class="output">
+    <span class="ts">$</span> agentgateway --version<br/>
+    <span class="info">{"version":"0.x.x","rust_version":"1.89.0","build_profile":"release"}</span>
+  </div>
+  <div class="prompt">
+    <span class="prompt-ps1"><span class="host">user</span><span class="sep">@</span><span class="host">lab</span><span class="sep">:</span><span class="path">~</span><span class="sep">$</span>&nbsp;</span>
+    <span class="prompt-cmd">export GEMINI_API_KEY=<span style="color:var(--cyan)">"AIza...your-key..."</span></span>
+  </div>
+</div>
+
+<div class="section" id="config">
+  <div class="section-header">
+    <span class="section-num">// 03</span>
+    <span class="section-title">CONFIG.YAML</span>
+    <span class="section-tag">STEP 2-3</span>
+  </div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">yaml</span><span class="code-file">~/agentgateway-config.yaml</span></div>
+    <pre><code>cat &gt; ~/agentgateway-config.yaml &lt;&lt; <span class="str">'YAML'</span>
+<span class="cmt"># yaml-language-server: $schema=https://agentgateway.dev/schema/config</span>
+<span class="key">binds</span>:
+  - <span class="key">port</span>: <span class="num">3000</span>
+    <span class="key">listeners</span>:
+      - <span class="key">routes</span>:
+          - <span class="key">policies</span>:             <span class="cmt"># ← route-level policies</span>
+              <span class="key">cors</span>:
+                <span class="key">allowOrigins</span>: [<span class="str">"*"</span>]
+                <span class="key">allowHeaders</span>: [<span class="str">"*"</span>]
+              <span class="key">localRateLimit</span>:
+                - <span class="key">maxTokens</span>: <span class="num">10</span>
+                  <span class="key">tokensPerFill</span>: <span class="num">10</span>
+                  <span class="key">fillInterval</span>: <span class="str">60s</span>
+            <span class="key">backends</span>:
+              - <span class="key">ai</span>:
+                  <span class="key">name</span>: <span class="str">gemini</span>
+                  <span class="key">provider</span>:
+                    <span class="key">gemini</span>:
+                      <span class="key">model</span>: <span class="str">gemini-2.5-flash-lite</span>
+                  <span class="key">policies</span>:          <span class="cmt"># ← backend-level policies</span>
+                    <span class="key">backendAuth</span>:
+                      <span class="key">key</span>: <span class="str">"$GEMINI_API_KEY"</span>
+YAML</code></pre>
+  </div>
+  <div class="output" style="font-size:11px;">
+    <span class="ok">STRUCTURE</span><br/>
+    ├─ <span class="info">route-level</span> &nbsp;: cors, localRateLimit, jwtAuth, basicAuth, apiKey<br/>
+    └─ <span style="color:var(--amber)">backend-level</span>: backendAuth, timeout, retry
+  </div>
+</div>
+
+<div class="section" id="run">
+  <div class="section-header">
+    <span class="section-num">// 04</span>
+    <span class="section-title">RUN + UI</span>
+    <span class="section-tag">STEP 4</span>
+  </div>
+  <div class="prompt">
+    <span class="prompt-ps1"><span class="host">user</span><span class="sep">@</span><span class="host">lab</span><span class="sep">:</span><span class="path">~</span><span class="sep">$</span>&nbsp;</span>
+    <span class="prompt-cmd">agentgateway -f agentgateway-config.yaml</span>
+  </div>
+  <div class="output">
+    <span class="ts">2026-03-19T06:42:36Z</span> <span class="info">info</span> &nbsp;management &nbsp;&nbsp; listener established &nbsp;address=[::]:15021<br/>
+    <span class="ts">2026-03-19T06:42:36Z</span> <span class="info">info</span> &nbsp;state_manager &nbsp;Watching config file: ~/agentgateway-config.yaml<br/>
+    <span class="ts">2026-03-19T06:42:36Z</span> <span class="info">info</span> &nbsp;app &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; serving UI at <a class="url" href="http://localhost:15000/ui">http://localhost:15000/ui</a><br/>
+    <span class="ts">2026-03-19T06:42:36Z</span> <span class="info">info</span> &nbsp;proxy::gateway started bind &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;bind="bind/3000"
+  </div>
+  <p>UI: <a href="http://localhost:15000/ui/"><strong style="color:var(--g0)">http://localhost:15000/ui/</strong></a></p>
+  <div class="shot">
+    <div class="shot-bar"><span class="shot-icon">[img]</span> agentgateway_run.png</div>
+    <img src="./lab1/beginner/agentgateway_run.png" alt="agentgateway run"/>
+    <div class="shot-cap">// термінальний вивід після запуску</div>
+  </div>
+  <div class="shot">
+    <div class="shot-bar"><span class="shot-icon">[img]</span> agentgateway_ui.png</div>
+    <img src="./lab1/beginner/agentgateway_ui.png" alt="agentgateway UI"/>
+    <div class="shot-cap">// web UI — Backends, Routes, Policy</div>
+  </div>
+</div>
+
+<div class="section" id="test">
+  <div class="section-header">
+    <span class="section-num">// 05</span>
+    <span class="section-title">TEST LLM ACCESS</span>
+    <span class="section-tag">STEP 5</span>
+  </div>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">bash</span><span class="code-file">test endpoint</span></div>
+    <pre><code>curl -s http://localhost:3000/v1/chat/completions \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{
+    "model": "gemini-2.5-flash-lite",
+    "messages": [{"role": "user", "content": "Hello!"}]
+  }'</span> | python3 -m json.tool</code></pre>
+  </div>
+  <div class="shot">
+    <div class="shot-bar"><span class="shot-icon">[img]</span> aggwt-response.png</div>
+    <img src="./lab1/beginner/aggwt-response.png" alt="LLM response"/>
+    <div class="shot-cap">// відповідь від Gemini через agentgateway</div>
+  </div>
+
+  <p style="margin-top:16px">Тест rate limit — 12 запитів підряд:</p>
+  <div class="code-wrap">
+    <div class="code-header"><span class="code-lang">bash</span></div>
+    <pre><code><span class="kw">for</span> i in $(seq 1 12); <span class="kw">do</span>
+  echo -n <span class="str">"request $i: "</span>
+  curl -s -o /dev/null -w <span class="str">"%{http_code}"</span> \
+    http://localhost:3000/v1/chat/completions \
+    -H <span class="str">"Content-Type: application/json"</span> \
+    -d <span class="str">'{"model":"gemini-2.5-flash-lite","messages":[{"role":"user","content":"hi"}]}'</span>
+  echo
+<span class="kw">done</span>
+<span class="cmt"># → 200 200 200 ... 200 429 429</span></code></pre>
+  </div>
+  <div class="shot">
+    <div class="shot-bar"><span class="shot-icon">[img]</span> rate_limit_policy.png</div>
+    <img src="./lab1/beginner/rate_limit_policy.png" alt="rate limit 429"/>
+    <div class="shot-cap">// 429 Too Many Requests після 10 запитів за 60s</div>
+  </div>
+</div>
+
+<div class="section" id="policy">
+  <div class="section-header">
+    <span class="section-num">// 06</span>
+    <span class="section-title">POLICY REFERENCE</span>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>policy</th><th>рівень</th><th>опис</th></tr></thead>
+      <tbody>
+        <tr><td><code>cors</code></td><td><span class="pbadge route">route</span></td><td>cross-origin запити з браузера</td></tr>
+        <tr><td><code>localRateLimit</code></td><td><span class="pbadge route">route</span></td><td>token bucket — N req / interval</td></tr>
+        <tr><td><code>jwtAuth</code></td><td><span class="pbadge route">route</span></td><td>JWT token validation</td></tr>
+        <tr><td><code>basicAuth</code></td><td><span class="pbadge route">route</span></td><td>HTTP Basic автентифікація</td></tr>
+        <tr><td><code>apiKey</code></td><td><span class="pbadge route">route</span></td><td>API key header validation</td></tr>
+        <tr><td><code>backendAuth</code></td><td><span class="pbadge backend">backend</span></td><td>API ключ до LLM провайдера</td></tr>
+        <tr><td><code>timeout</code></td><td><span class="pbadge backend">backend</span></td><td>таймаут запиту до провайдера</td></tr>
+        <tr><td><code>retry</code></td><td><span class="pbadge backend">backend</span></td><td>автоматичний retry при помилці</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="section" id="files">
+  <div class="section-header">
+    <span class="section-num">// 07</span>
+    <span class="section-title">REPO STRUCTURE</span>
+  </div>
+  <div class="tree">
+    <pre><code><span class="t-file">README.html</span>                   <span class="t-cmt"># цей файл</span>
+<span class="t-dir">lab1/</span>
+<span class="t-sym">├──</span> <span class="t-file">agentgateway-config.yaml</span>  <span class="t-cmt"># standalone конфіг</span>
+<span class="t-sym">└──</span> <span class="t-dir">beginner/</span>
+    <span class="t-sym">├──</span> <span class="t-file">agentgateway_run.png</span>   <span class="t-cmt"># термінальний запуск</span>
+    <span class="t-sym">├──</span> <span class="t-file">agentgateway_ui.png</span>    <span class="t-cmt"># web UI</span>
+    <span class="t-sym">├──</span> <span class="t-file">aggwt-response.png</span>     <span class="t-cmt"># відповідь Gemini</span>
+    <span class="t-sym">└──</span> <span class="t-file">rate_limit_policy.png</span>  <span class="t-cmt"># 429 rate limit тест</span></code></pre>
+  </div>
+</div>
+
+<div class="section" id="links">
+  <div class="section-header">
+    <span class="section-num">// 08</span>
+    <span class="section-title">REFERENCES</span>
+  </div>
+  <div class="links">
+    <div class="lnk"><a href="https://agentgateway.dev/docs/"><span class="lnk-arr">→</span> agentgateway docs</a></div>
+    <div class="lnk"><a href="https://agentgateway.dev/docs/kubernetes/main/"><span class="lnk-arr">→</span> kubernetes mode</a></div>
+    <div class="lnk"><a href="https://kagent.dev/docs/"><span class="lnk-arr">→</span> kagent docs</a></div>
+    <div class="lnk"><a href="https://aistudio.google.com/api-keys"><span class="lnk-arr">→</span> google ai studio</a></div>
+    <div class="lnk"><a href="https://github.com/Azure/AKS/releases"><span class="lnk-arr">→</span> aks release notes</a></div>
+    <div class="lnk"><a href="https://gateway-api.sigs.k8s.io/"><span class="lnk-arr">→</span> gateway api</a></div>
+  </div>
+</div>
+
+<div class="div-line">// eof</div>
+<div style="padding:24px 0;font-size:11px;color:var(--text3);text-align:center">
+  lab-1 · agentgateway · llmops certification · 2026
+</div>
+
+</div>
+</body>
+</html>
