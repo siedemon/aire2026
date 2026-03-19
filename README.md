@@ -11,7 +11,6 @@
 - [Передумови](#передумови)
 - [Початківці — standalone режим](#початківці--standalone-режим)
 - [Файли репозиторію](#файли-репозиторію)
-- [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -148,6 +147,8 @@ curl -s http://localhost:8080/v1/chat/completions \
     "messages": [{"role": "user", "content": "Hello!"}]
   }' | python3 -m json.tool
 ```
+
+# файли-репозиторію
 
 README.md                  # цей файл
 lab1/
