@@ -97,6 +97,8 @@ YAML
 ```bash
 agentgateway -f agentgateway-config.yaml
 ```
+![agentgateway run](./lab1/beginner/agentgateway_run.png)
+
 
 Відкрити UI: **http://localhost:15000/ui/**
 
