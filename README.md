@@ -1,6 +1,6 @@
 # Lab-1: Basic Agentic Infrastructure
 
-> Розгортання agentgateway + kagent на AKS для курсу LLMOps
+> Розгортання agentgateway
 
 ---
 
