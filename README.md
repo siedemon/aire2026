@@ -152,6 +152,10 @@ curl -s http://localhost:8080/v1/chat/completions \
   }' | python3 -m json.tool
 ```
 
+![agentgateway response](./lab1/beginner/aggwt-response.png)
+
+![agentgateway policytest](./lab1/beginner/rate_limit_policy.png)
+
 ## Файли репозиторію
 
 ```
