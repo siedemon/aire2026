@@ -100,6 +100,8 @@ agentgateway -f agentgateway-config.yaml
 
 Відкрити UI: **http://localhost:15000/ui/**
 
+![agentgateway UI](./lab1/beginner/agentgateway_ui.png)
+
 ### 5. Перевірити доступ до LLM
 
 ```bash
